@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+  web:
+  build: .
+  command: bundle exec rails s -p 80 -b '0.0.0.0'
+  ports:
+    - "80:80"
+  links:
+    - db
+
+    volumes:
+      - ./:/var/www/html
+      - ./apache.conf:/etc/apache2/sites-available/000-default.conf
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - "./.data/db:/var/lib/mysql"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel_ddb
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+    ports:
+      - "6603:3306"
