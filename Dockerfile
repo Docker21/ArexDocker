@@ -1,4 +1,4 @@
-ROM ubuntu:latest
+FROM ubuntu:latest
 
 RUN apt-get clean && apt-get update
 RUN apt-get install locales
@@ -31,7 +31,4 @@ WORKDIR /var/www/html
 EXPOSE 80
 
 ENTRYPOINT [ "/usr/sbin/apache2" ]
-
-RUN bundle install
-
-CMD ["rails", "server", "-b", "0.0.0.0"]
+CMD ["-D", "FOREGROUND"]
