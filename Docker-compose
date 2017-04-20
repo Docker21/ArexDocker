@@ -1,29 +1,43 @@
-version: '2'
+mysqlServeur:
+ image: mysql
+ environment:
+  - MYSQL_ROOT_PASSWORD=lotfi
+ports:
+  - 6603:3306
+  - 6604:3306
 
-services:
-  web:
-  build: .
-  command: bundle exec rails s -p 80 -b '0.0.0.0'
-  ports:
-    - "80:80"
-  links:
-    - db
 
-    volumes:
-      - ./:/var/www/html
-      - ./apache.conf:/etc/apache2/sites-available/000-default.conf
-    depends_on:
-      - db
 
-  db:
-    image: mysql:5.7
-    volumes:
-      - "./.data/db:/var/lib/mysql"
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: laravel_ddb
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: laravel
+phpServeur:
+ image: jprjr/php-fpm
+ volumes:
+  - /c/Users/Tyller/Docker/projet_tuto/web/:/srv/http
+ links:
+  - mysqlServeur:mysql
+ ports:
+  - 8888:8888
+
+
+
+webServeur:
+    build: apache
+    links:
+        - phpServeur:phpServeur
     ports:
-      - "6603:3306"
+        - 80:80
+    volumes:
+        - /var/www:/var/www/local.dev
+        - /var/www/docker/php.ini:/etc/php5/apache2/conf.d/30-custom.ini
+        - /var/www/docker/sites:/etc/apache2/sites-enabled
+    environment:
+        - ALLOW_OVERRIDE=true
+    command: apache2 -c /apache2.conf
+
+phpmyadmin:
+ image: corbinu/docker-phpmyadmin
+ environment:
+  - MYSQL_USERNAME=root
+ ports:
+  - 8181:80
+ links:
+  - mysqlServeur:mysql
